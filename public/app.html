@@ -13,6 +13,7 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     
     <!-- Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -11383,14 +11384,26 @@
                 }
                 
                 // Check auth state
-                firebase.auth().onAuthStateChanged(function(user) {
+                firebase.auth().onAuthStateChanged(async function(user) {
                     const loadingEl = document.getElementById('auth-loading');
                     const userInfoEl = document.getElementById('userInfo');
                     const logoutBtnEl = document.getElementById('logoutBtn');
                     const userEmailEl = document.getElementById('userEmail');
                     
                     if (user) {
-                        // User is signed in
+                        // Vérifier le status dans Firestore
+                        const db = firebase.firestore();
+                        const userDoc = await db.collection('users').doc(user.email).get();
+                        
+                        if (!userDoc.exists || userDoc.data().status !== 'approved') {
+                            // Non validé, déconnecter et rediriger
+                            console.log('❌ User not approved');
+                            await firebase.auth().signOut();
+                            window.location.href = 'index.html';
+                            return;
+                        }
+                        
+                        // User is signed in and approved
                         console.log('✅ User authenticated:', user.email);
                         
                         // Show UI elements

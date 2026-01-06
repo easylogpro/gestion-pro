@@ -13,6 +13,7 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     
     <style>
         /* ============================================
@@ -1031,6 +1032,19 @@
             try {
                 await firebase.auth().signInWithEmailAndPassword(email, password);
                 
+                // Vérifier le status dans Firestore
+                const db = firebase.firestore();
+                const userDoc = await db.collection('users').doc(email).get();
+                
+                if (!userDoc.exists || userDoc.data().status !== 'approved') {
+                    // Déconnecter l'utilisateur
+                    await firebase.auth().signOut();
+                    showError('⏳ Votre compte est en attente de validation');
+                    submitBtn.classList.remove('loading');
+                    submitBtn.disabled = false;
+                    return;
+                }
+                
                 // Success animation
                 document.getElementById('successOverlay').classList.add('visible');
                 
@@ -1093,15 +1107,26 @@
             hideError();
             
             try {
+                // Créer le compte
                 await firebase.auth().createUserWithEmailAndPassword(email, password);
                 
-                // Success
-                document.getElementById('successOverlay').classList.add('visible');
-                document.querySelector('.success-text').textContent = 'Compte créé !';
+                // Ajouter dans Firestore avec status "pending"
+                const db = firebase.firestore();
+                await db.collection('users').doc(email).set({
+                    status: 'pending',
+                    createdAt: new Date().toISOString()
+                });
                 
-                setTimeout(() => {
-                    window.location.href = 'app.html';
-                }, 1500);
+                // Déconnecter l'utilisateur
+                await firebase.auth().signOut();
+                
+                // Afficher message d'attente
+                document.getElementById('successOverlay').classList.add('visible');
+                document.querySelector('.success-icon').textContent = '⏳';
+                document.querySelector('.success-text').textContent = 'Compte créé !';
+                document.querySelector('.success-subtext').textContent = 'En attente de validation par l\'administrateur';
+                
+                // Ne pas rediriger - rester sur la page
                 
             } catch (error) {
                 console.error('Register error:', error);
