@@ -10,98 +10,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    
     <!-- Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <style>
-        /* Auth Loading Screen */
-        #auth-loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 99999;
-            transition: opacity 0.5s ease, visibility 0.5s ease;
-        }
-        #auth-loading.hidden {
-            opacity: 0;
-            visibility: hidden;
-        }
-        .auth-spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid rgba(16, 185, 129, 0.2);
-            border-top-color: #10b981;
-            border-radius: 50%;
-            animation: auth-spin 1s linear infinite;
-            margin-bottom: 1.5rem;
-        }
-        @keyframes auth-spin {
-            to { transform: rotate(360deg); }
-        }
-        .auth-text {
-            color: #94a3b8;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 1rem;
-        }
-        /* Logout Button */
-        .logout-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 18px;
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 0.875rem;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
-            transition: all 0.3s ease;
-        }
-        .logout-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
-        }
-        .user-info {
-            position: fixed;
-            top: 20px;
-            right: 140px;
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 16px;
-            background: rgba(255, 255, 255, 0.95);
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 0.8rem;
-            color: #475569;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-        }
-        .user-info-icon {
-            font-size: 1.1rem;
-        }
-    </style>
     
     <style>
         /* ============================================
@@ -4326,22 +4237,6 @@
     </style>
 </head>
 <body>
-    <!-- Auth Loading Screen -->
-    <div id="auth-loading">
-        <div class="auth-spinner"></div>
-        <div class="auth-text">Vérification de l'authentification...</div>
-    </div>
-    
-    <!-- User Info & Logout -->
-    <div class="user-info" id="userInfo" style="display: none;">
-        <span class="user-info-icon">👤</span>
-        <span id="userEmail">-</span>
-    </div>
-    <button class="logout-btn" id="logoutBtn" onclick="handleLogout()" style="display: none;">
-        <span>🚪</span>
-        <span>Déconnexion</span>
-    </button>
-    
     <div class="app-container">
         <!-- ============================================
              SIDEBAR
@@ -4718,11 +4613,15 @@
                                             <span class="sector-badge s1">🔵 S1</span>
                                         </div>
                                         <div class="dsf-sector-stats">
-                                            <div class="dsf-mini-stat" onclick="navigateTo('dsf'); DSF.switchTab('cloture');">
+                                            <div class="dsf-mini-stat clickable" onclick="openDSFModal('cloture','S1')">
                                                 <span class="dsf-mini-value" id="dsfS1Cloture">0</span>
                                                 <span class="dsf-mini-label">CLOT</span>
                                             </div>
-                                            <div class="dsf-mini-stat" onclick="navigateTo('dsf'); DSF.switchTab('resp');">
+                                            <div class="dsf-mini-stat clickable" onclick="openDSFModal('planif','S1')">
+                                                <span class="dsf-mini-value" id="dsfS1Planif">0</span>
+                                                <span class="dsf-mini-label">PLANIF</span>
+                                            </div>
+                                            <div class="dsf-mini-stat clickable" onclick="openDSFModal('resp','S1')">
                                                 <span class="dsf-mini-value" id="dsfS1Resp">0</span>
                                                 <span class="dsf-mini-label">RESP</span>
                                             </div>
@@ -4734,11 +4633,15 @@
                                             <span class="sector-badge s2">🟢 S2</span>
                                         </div>
                                         <div class="dsf-sector-stats">
-                                            <div class="dsf-mini-stat">
+                                            <div class="dsf-mini-stat clickable" onclick="openDSFModal('cloture','S2')">
                                                 <span class="dsf-mini-value" id="dsfS2Cloture">0</span>
                                                 <span class="dsf-mini-label">CLOT</span>
                                             </div>
-                                            <div class="dsf-mini-stat">
+                                            <div class="dsf-mini-stat clickable" onclick="openDSFModal('planif','S2')">
+                                                <span class="dsf-mini-value" id="dsfS2Planif">0</span>
+                                                <span class="dsf-mini-label">PLANIF</span>
+                                            </div>
+                                            <div class="dsf-mini-stat clickable" onclick="openDSFModal('resp','S2')">
                                                 <span class="dsf-mini-value" id="dsfS2Resp">0</span>
                                                 <span class="dsf-mini-label">RESP</span>
                                             </div>
@@ -4750,11 +4653,15 @@
                                             <span class="sector-badge s3">🔴 S3</span>
                                         </div>
                                         <div class="dsf-sector-stats">
-                                            <div class="dsf-mini-stat">
+                                            <div class="dsf-mini-stat clickable" onclick="openDSFModal('cloture','S3')">
                                                 <span class="dsf-mini-value" id="dsfS3Cloture">0</span>
                                                 <span class="dsf-mini-label">CLOT</span>
                                             </div>
-                                            <div class="dsf-mini-stat">
+                                            <div class="dsf-mini-stat clickable" onclick="openDSFModal('planif','S3')">
+                                                <span class="dsf-mini-value" id="dsfS3Planif">0</span>
+                                                <span class="dsf-mini-label">PLANIF</span>
+                                            </div>
+                                            <div class="dsf-mini-stat clickable" onclick="openDSFModal('resp','S3')">
                                                 <span class="dsf-mini-value" id="dsfS3Resp">0</span>
                                                 <span class="dsf-mini-label">RESP</span>
                                             </div>
@@ -4766,11 +4673,15 @@
                                             <span class="sector-badge autres">⚪ Autres</span>
                                         </div>
                                         <div class="dsf-sector-stats">
-                                            <div class="dsf-mini-stat">
+                                            <div class="dsf-mini-stat clickable" onclick="openDSFModal('cloture','AUTRES')">
                                                 <span class="dsf-mini-value" id="dsfAutresCloture">0</span>
                                                 <span class="dsf-mini-label">CLOT</span>
                                             </div>
-                                            <div class="dsf-mini-stat">
+                                            <div class="dsf-mini-stat clickable" onclick="openDSFModal('planif','AUTRES')">
+                                                <span class="dsf-mini-value" id="dsfAutresPlanif">0</span>
+                                                <span class="dsf-mini-label">PLANIF</span>
+                                            </div>
+                                            <div class="dsf-mini-stat clickable" onclick="openDSFModal('resp','AUTRES')">
                                                 <span class="dsf-mini-value" id="dsfAutresResp">0</span>
                                                 <span class="dsf-mini-label">RESP</span>
                                             </div>
@@ -5560,6 +5471,13 @@
                                 Historique des Visites
                             </h2>
                             <div class="historique-actions">
+                                <input type="file" id="historiqueFileInput" accept=".xlsx,.xls" style="display:none;" onchange="VISITESMODULE.chargerHistorique(event)">
+                                <button class="btn-secondary" onclick="document.getElementById('historiqueFileInput').click()">
+                                    <span>📂</span> Charger historique
+                                </button>
+                                <button class="btn-secondary" onclick="VISITESMODULE.ajouterSemaineHistorique()">
+                                    <span>➕</span> Ajouter semaine
+                                </button>
                                 <button class="btn-secondary" onclick="VISITESMODULE.exportHistorique()">
                                     <span>📥</span> Exporter
                                 </button>
@@ -5995,6 +5913,63 @@
                     </div>
                 </div>
 
+                <!-- Modal DSF Clôture/Planif/Resp avec filtres Mois + STT + Relance Mail -->
+                <div id="dsfModal" class="modal-overlay" style="display:none;">
+                    <div class="modal-container" style="max-width:95vw;width:1200px;max-height:90vh;overflow:hidden;">
+                        <div style="background:linear-gradient(135deg,#667eea,#764ba2);padding:15px 20px;display:flex;justify-content:space-between;align-items:center;">
+                            <h2 id="dsfModalTitle" style="color:white;margin:0;">📋 DSF</h2>
+                            <button onclick="closeDSFModal()" style="color:white;background:none;border:none;font-size:24px;cursor:pointer;">×</button>
+                        </div>
+                        <div style="padding:15px;overflow-y:auto;max-height:calc(90vh - 80px);">
+                            <!-- Filtre Mois -->
+                            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;padding:10px;background:var(--bg-tertiary);border-radius:10px;">
+                                <span style="font-weight:600;color:var(--text-muted);margin-right:5px;">📅 Mois:</span>
+                                <button class="dsf-flt-btn active" data-mois="ALL" onclick="filterDSFMois('ALL')">Tous <span class="dsf-flt-cnt" id="dsfMoisAll">0</span></button>
+                                <div id="dsfMoisContainer" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+                            </div>
+                            <!-- Filtre STT -->
+                            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:15px;padding:10px;background:var(--bg-tertiary);border-radius:10px;">
+                                <span style="font-weight:600;color:var(--text-muted);margin-right:5px;">👷 STT:</span>
+                                <button class="dsf-flt-btn active" data-stt="ALL" onclick="filterDSFStt('ALL')">Tous <span class="dsf-flt-cnt" id="dsfSttAll">0</span></button>
+                                <div id="dsfSttContainer" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+                            </div>
+                            <!-- Bouton Relance Mail -->
+                            <div style="margin-bottom:15px;display:flex;gap:10px;align-items:center;">
+                                <button class="btn-primary" onclick="sendDSFRelance()" style="background:linear-gradient(135deg,#ef4444,#dc2626);">
+                                    <span>✉️</span> Envoyer Relance STT
+                                </button>
+                                <span id="dsfMailStatus" style="color:var(--text-muted);font-size:0.85em;"></span>
+                            </div>
+                            <!-- Tableau -->
+                            <div style="overflow-x:auto;">
+                                <table style="width:100%;border-collapse:collapse;">
+                                    <thead><tr style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;">
+                                        <th style="padding:10px;text-align:left;">N° Client</th>
+                                        <th style="padding:10px;text-align:left;">Nom Site</th>
+                                        <th style="padding:10px;text-align:left;">Ville</th>
+                                        <th style="padding:10px;text-align:center;">Mois</th>
+                                        <th style="padding:10px;text-align:left;">STT</th>
+                                        <th style="padding:10px;text-align:left;">Secteur</th>
+                                    </tr></thead>
+                                    <tbody id="dsfTableBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <style>
+                    .dsf-flt-btn{padding:8px 14px;border:2px solid var(--border-color);background:var(--bg-card);color:var(--text-primary);border-radius:20px;cursor:pointer;font-weight:600;font-size:0.85em;transition:all 0.3s;display:flex;align-items:center;gap:6px;}
+                    .dsf-flt-btn:hover{border-color:var(--primary);background:rgba(102,126,234,0.1);}
+                    .dsf-flt-btn.active{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border-color:transparent;}
+                    .dsf-flt-cnt{background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:10px;font-size:0.85em;}
+                    .dsf-flt-btn.active .dsf-flt-cnt{background:rgba(255,255,255,0.3);}
+                    .dsf-mini-stat.clickable{cursor:pointer;transition:transform 0.2s;}
+                    .dsf-mini-stat.clickable:hover{transform:scale(1.05);}
+                    #dsfTableBody tr{border-bottom:1px solid var(--border-color);transition:background 0.2s;}
+                    #dsfTableBody tr:hover{background:rgba(102,126,234,0.08);}
+                    #dsfTableBody td{padding:10px;}
+                </style>
+
                 <!-- ============================================
                      PAGE: PRODUITS (Module complet)
                      ============================================ -->
@@ -6196,6 +6171,34 @@
         // ============================================
         // DONNÉES GLOBALES
         // ============================================
+        
+        // Fonctions de recherche dynamique par en-tête (année automatique)
+        function findColumnByHeader(headers, searchText) {
+            const index = headers.findIndex(h => 
+                h && h.toString().toUpperCase().trim().includes(searchText.toUpperCase())
+            );
+            if (index === -1) {
+                console.warn("⚠️ Colonne introuvable : " + searchText);
+            }
+            return index;
+        }
+
+        function getYearColumns() {
+            const annee = new Date().getFullYear();
+            const anneeCourte = String(annee - 2000);
+            return {
+                annee: annee,
+                anneeCourte: anneeCourte,
+                V1: 'V1-' + anneeCourte,
+                V2: 'V2-' + anneeCourte,
+                VERIF_DSF_V1: 'VERIF DSF ' + annee,        // Visite 1 : Verif DSF 2026
+                VERIF_DSF_V2: 'VERIF DSF ' + annee + '-2'  // Visite 2 : Verif DSF 2026-2
+            };
+        }
+        
+        const YEAR_COLS = getYearColumns();
+        console.log('📅 Colonnes recherchées:', YEAR_COLS.V1, YEAR_COLS.V2);
+        
         const APP = {
             data: {
                 travaux: [],
@@ -6495,7 +6498,28 @@
                             // Stocker les headers pour le module SEARCHSSI
                             APP.data.ssiHeaders = jsonData[0];
                             
-                            const colE = 4, colBT = 71, colBP = 67, colBQ = 68, colBV = 73;
+                            // Colonnes dynamiques selon l'année
+                            const ssiHeaders = jsonData[0];
+                            const colE = 4;
+                            const colBT = findColumnByHeader(ssiHeaders, 'PL 1');
+                            const colBP = findColumnByHeader(ssiHeaders, YEAR_COLS.V1);
+                            const colBQ = findColumnByHeader(ssiHeaders, YEAR_COLS.V2);
+                            const colBV = findColumnByHeader(ssiHeaders, 'PL 2');
+                            
+                            // Vérifier si les colonnes de l'année en cours existent
+                            const ssiAnneeOK = colBP !== -1 && colBQ !== -1;
+                            if (!ssiAnneeOK) {
+                                alert('⚠️ BASE ACCESS À METTRE À JOUR !\n\nColonnes ' + YEAR_COLS.V1 + ' et/ou ' + YEAR_COLS.V2 + ' introuvables.\n\nLe calcul SSI ne sera pas effectué.');
+                                console.warn('❌ SSI: Colonnes année ' + YEAR_COLS.annee + ' non trouvées');
+                            }
+                            
+                            // Calculer semaine courante pour V2
+                            const now = new Date();
+                            const startYear = new Date(now.getFullYear(), 0, 1);
+                            const currentWeek = Math.ceil((now - startYear) / (7 * 24 * 60 * 60 * 1000));
+                            const analyserV2 = currentWeek >= 27;
+                            
+                            console.log('🔍 SSI Colonnes:', {V1: YEAR_COLS.V1 + '→idx' + colBP, V2: YEAR_COLS.V2 + '→idx' + colBQ, semaine: currentWeek, analyserV2: analyserV2});
                             
                             // DEBUG: Afficher les en-têtes pour vérifier les colonnes
                             console.log('📋 SSI Headers (premiers 80):', jsonData[0].slice(0, 80));
@@ -6504,7 +6528,7 @@
                             // DEBUG: Afficher quelques entrées du mapping TECH
                             console.log('📋 TECH Mapping (5 premiers):', Object.entries(techMapping).slice(0, 5));
                             
-                            APP.data.ssi = jsonData.slice(1).map((row, idx) => {
+                            APP.data.ssi = ssiAnneeOK ? jsonData.slice(1).map((row, idx) => {
                                 if (!row || !Array.isArray(row)) return null;
                                 const techCode = row[colE];
                                 const techConverted = convertTech(techCode);
@@ -6525,11 +6549,11 @@
                                     techCode, techConverted, secteur,
                                     bt, bp, bq, bv,
                                     v1Restante: !bt && !bp,
-                                    v2Restante: !bq && !bv,
+                                    v2Restante: analyserV2 ? (!bq && !bv) : false,
                                     numClient: row[0] || '',
                                     nomSite: row[4] || ''
                                 };
-                            }).filter(r => r !== null);
+                            }).filter(r => r !== null) : [];
                             
                             // DEBUG: Comptage par secteur
                             const secteurCounts = { S1: 0, S2: 0, S3: 0, AUTRES: 0 };
@@ -6559,14 +6583,31 @@
                         const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
                         
                         if (jsonData.length > 1) {
-                            const colA = 0, colE = 4, colG = 6, colL = 11, colY = 24, colZ = 25;
-                            const colAC = 28, colAH = 33, colAI = 34, colAJ = 35, colBU = 72, colBV = 73, colBW = 74;
+                            // Colonnes stables
+                            const colA = 0, colE = 4, colG = 6, colL = 11;
+                            const colAC = 28, colAH = 33, colAI = 34, colAJ = 35, colBW = 74;
+                            
+                            // Colonnes dynamiques selon l'année
+                            const dsfHeaders = jsonData[0];
+                            const colY = findColumnByHeader(dsfHeaders, YEAR_COLS.VERIF_DSF_V1);
+                            const colZ = findColumnByHeader(dsfHeaders, YEAR_COLS.VERIF_DSF_V2);
+                            const colBU = 72;
+                            const colBV = 73;
+                            
+                            // Vérifier si les colonnes de l'année en cours existent
+                            const dsfAnneeOK = colY !== -1 && colZ !== -1;
+                            if (!dsfAnneeOK) {
+                                alert('⚠️ BASE ACCESS À METTRE À JOUR !\n\nColonnes ' + YEAR_COLS.VERIF_DSF_V1 + ' et/ou ' + YEAR_COLS.VERIF_DSF_V2 + ' introuvables.\n\nLe calcul DSF ne sera pas effectué.');
+                                console.warn('❌ DSF: Colonnes année ' + YEAR_COLS.annee + ' non trouvées');
+                            }
+                            
+                            console.log('🔍 DSF Colonnes:', {Y: YEAR_COLS.VERIF_DSF_V1 + '→idx' + colY, Z: YEAR_COLS.VERIF_DSF_V2 + '→idx' + colZ, anneeOK: dsfAnneeOK});
                             
                             // DEBUG: Afficher les en-têtes pour vérifier les colonnes
                             console.log('📋 DSF Headers (premiers 40):', jsonData[0].slice(0, 40));
                             console.log('📋 DSF Exemple ligne 2:', jsonData[1]?.slice(0, 40));
                             
-                            APP.data.dsf = jsonData.slice(1).map((row, idx) => {
+                            APP.data.dsf = dsfAnneeOK ? jsonData.slice(1).map((row, idx) => {
                                 if (!row || !Array.isArray(row)) return null;
                                 
                                 const secteurCode = row[colAJ];
@@ -6610,7 +6651,7 @@
                                     contact: row[colL] || '',
                                     heureDSF: row[colBW] || ''
                                 };
-                            }).filter(r => r !== null);
+                            }).filter(r => r !== null) : [];
                             sheetsLoaded.push({ name: 'DSF', count: APP.data.dsf.length });
                             console.log('✅ DSF chargé:', APP.data.dsf.length, 'lignes');
                         }
@@ -6768,18 +6809,38 @@
                                 const dataKey = suffix === 'CLOTURE' ? 'dsfCloture' :
                                                suffix === 'PLANIF' ? 'dsfPlanif' : 'dsfResp';
                                 
+                                // Chercher colonnes par en-tête
+                                const headers = jsonData[0];
+                                const colNum = findColumnByHeader(headers, 'Num');
+                                const colNomSite = findColumnByHeader(headers, 'Nom du site');
+                                const colVille = findColumnByHeader(headers, 'Ville');
+                                const colSTT = findColumnByHeader(headers, 'sous traitant');
+                                const colSTT2 = findColumnByHeader(headers, 'STT 2');
+                                const colTech = findColumnByHeader(headers, 'technicien 2008');
+                                const colMoisSTT = findColumnByHeader(headers, 'mois STT');
+                                
                                 APP.data[dataKey] = jsonData.slice(1).map(row => {
                                     if (!row || !Array.isArray(row)) return null;
-                                    const secteurCode = row[35];
-                                    const secteurConverted = convertTech(secteurCode);
+                                    
+                                    const techCode = colTech !== -1 ? String(row[colTech] || '').trim() : '';
+                                    const techConverted = convertTech(techCode);
+                                    const secteur = getSector(techConverted);
+                                    
+                                    let sttCode = colSTT !== -1 ? String(row[colSTT] || '').trim() : '';
+                                    if (!sttCode && colSTT2 !== -1) sttCode = String(row[colSTT2] || '').trim();
+                                    const sttConverted = convertStt(sttCode);
+                                    
+                                    const moisSTT = colMoisSTT !== -1 ? String(row[colMoisSTT] || '').trim() : '';
                                     
                                     return {
                                         _raw: row,
-                                        secteur: getSector(secteurConverted),
-                                        stt: convertStt(row[33]),
-                                        numClient: row[0] || '',
-                                        nomSite: row[4] || '',
-                                        ville: row[6] || ''
+                                        secteur: secteur,
+                                        stt: sttConverted,
+                                        sttCode: sttCode,
+                                        moisSTT: moisSTT,
+                                        numClient: colNum !== -1 ? (row[colNum] || '') : (row[0] || ''),
+                                        nomSite: colNomSite !== -1 ? (row[colNomSite] || '') : (row[4] || ''),
+                                        ville: colVille !== -1 ? (row[colVille] || '') : (row[6] || '')
                                     };
                                 }).filter(r => r !== null);
                                 
@@ -7343,6 +7404,12 @@
         function initEvolutionChart() {
             const ctx = document.getElementById('evolutionChart');
             if (!ctx) return;
+            
+            // Détruire le chart existant s'il existe
+            if (DASHBOARD.chart) {
+                DASHBOARD.chart.destroy();
+                DASHBOARD.chart = null;
+            }
             
             // Récupérer les données initiales depuis DASHBOARD
             const chartData = DASHBOARD.getChartData('TOUS');
@@ -8256,8 +8323,115 @@
                 statusEl.className = 'mail-status success';
             },
 
+            // Données historique chargées
+            historiqueData: [],
+
+            chargerHistorique(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, {type: 'array'});
+                        
+                        // Chercher la feuille HISTORIQUE
+                        const sheetName = workbook.SheetNames.find(n => n.toUpperCase().includes('HISTORIQUE')) || workbook.SheetNames[0];
+                        const sheet = workbook.Sheets[sheetName];
+                        const jsonData = XLSX.utils.sheet_to_json(sheet);
+                        
+                        this.historiqueData = jsonData;
+                        alert('✅ Historique chargé : ' + jsonData.length + ' lignes');
+                        console.log('📂 Historique chargé:', jsonData);
+                    } catch (err) {
+                        console.error('❌ Erreur chargement historique:', err);
+                        alert('❌ Erreur : ' + err.message);
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+                event.target.value = '';
+            },
+
+            ajouterSemaineHistorique() {
+                // Calculer semaine courante
+                const now = new Date();
+                const start = new Date(now.getFullYear(), 0, 1);
+                const diff = now - start;
+                const oneWeek = 1000 * 60 * 60 * 24 * 7;
+                const semaine = Math.ceil(diff / oneWeek);
+                const annee = now.getFullYear();
+                
+                // Calculer les stats SSI par secteur
+                const ssiStats = { S1: {v1: 0, v2: 0}, S2: {v1: 0, v2: 0}, S3: {v1: 0, v2: 0}, AUTRES: {v1: 0, v2: 0} };
+                if (APP.data.ssi) {
+                    APP.data.ssi.forEach(r => {
+                        const key = ['S1','S2','S3'].includes(r.secteur) ? r.secteur : 'AUTRES';
+                        if (r.v1Restante) ssiStats[key].v1++;
+                        if (r.v2Restante) ssiStats[key].v2++;
+                    });
+                }
+                
+                // Calculer les stats DSF par secteur
+                const dsfStats = { S1: 0, S2: 0, S3: 0, AUTRES: 0 };
+                if (APP.data.dsf) {
+                    APP.data.dsf.forEach(r => {
+                        const key = ['S1','S2','S3'].includes(r.secteur) ? r.secteur : 'AUTRES';
+                        dsfStats[key] += r.visitesRestantes || 0;
+                    });
+                }
+                
+                // Vérifier si cette semaine existe déjà
+                const existe = this.historiqueData.find(h => h.Semaine === semaine && h.Annee === annee);
+                if (existe) {
+                    if (!confirm('⚠️ Semaine ' + semaine + '/' + annee + ' existe déjà. Remplacer ?')) {
+                        return;
+                    }
+                    // Supprimer les anciennes entrées
+                    this.historiqueData = this.historiqueData.filter(h => !(h.Semaine === semaine && h.Annee === annee));
+                }
+                
+                // Ajouter les nouvelles lignes
+                ['S1', 'S2', 'S3', 'AUTRES'].forEach(secteur => {
+                    this.historiqueData.push({
+                        Semaine: semaine,
+                        Annee: annee,
+                        Secteur: secteur,
+                        SSI_V1_Restantes: ssiStats[secteur].v1,
+                        SSI_V2_Restantes: ssiStats[secteur].v2,
+                        DSF_Restantes: dsfStats[secteur]
+                    });
+                });
+                
+                // Trier par année puis semaine
+                this.historiqueData.sort((a, b) => {
+                    if (a.Annee !== b.Annee) return a.Annee - b.Annee;
+                    if (a.Semaine !== b.Semaine) return a.Semaine - b.Semaine;
+                    return a.Secteur.localeCompare(b.Secteur);
+                });
+                
+                alert('✅ Semaine ' + semaine + '/' + annee + ' ajoutée à l\'historique (' + this.historiqueData.length + ' lignes)');
+            },
+
             exportHistorique() {
-                alert('📥 Export en cours de développement...');
+                if (this.historiqueData.length === 0) {
+                    alert('⚠️ Aucune donnée dans l\'historique.\n\nUtilisez "Charger historique" pour charger un fichier existant\nou "Ajouter semaine" pour ajouter la semaine courante.');
+                    return;
+                }
+                
+                try {
+                    const wb = XLSX.utils.book_new();
+                    const ws = XLSX.utils.json_to_sheet(this.historiqueData);
+                    XLSX.utils.book_append_sheet(wb, ws, 'HISTORIQUE');
+                    
+                    const dateExport = new Date().toLocaleDateString('fr-FR').replace(/\//g, '-');
+                    const fileName = 'GESTION_PRO_Historique_' + dateExport + '.xlsx';
+                    XLSX.writeFile(wb, fileName);
+                    alert('✅ Export réussi : ' + fileName + '\n\n' + this.historiqueData.length + ' lignes exportées');
+                } catch (err) {
+                    console.error('❌ Erreur export:', err);
+                    alert('❌ Erreur : ' + err.message);
+                }
             }
         };
 
@@ -8698,6 +8872,19 @@
             const dataBySection = { s1: {}, s2: {}, s3: {}, autres: {} };
             const currentMonth = new Date().getMonth() + 1;
             
+            // Calculer semaine courante pour logique de retard
+            const now = new Date();
+            const startYear = new Date(now.getFullYear(), 0, 1);
+            const currentWeek = Math.ceil((now - startYear) / (7 * 24 * 60 * 60 * 1000));
+            
+            // Fonction pour obtenir la dernière semaine d'un mois
+            const getLastWeekOfMonth = (mois) => {
+                // Approximation : mois 1 = semaines 1-4, mois 2 = semaines 5-9, etc.
+                const lastDay = new Date(now.getFullYear(), mois, 0); // Dernier jour du mois
+                const startOfYear = new Date(now.getFullYear(), 0, 1);
+                return Math.ceil((lastDay - startOfYear) / (7 * 24 * 60 * 60 * 1000));
+            };
+            
             // Stocker les données pour la modal STT (global)
             window.DSF_STT_DATA = { s1: {}, s2: {}, s3: {}, autres: {} };
             
@@ -8728,14 +8915,20 @@
                         dataBySection[row.sector][sttKey].mois[moisNum - 1] += row.restantes;
                         const MOIS_NOMS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
                         
-                        if (moisNum < currentMonth) {
-                            // Site en retard
+                        // Retard basé sur la semaine : si la dernière semaine du mois prévu < semaine courante
+                        const lastWeekOfMois = getLastWeekOfMonth(moisNum);
+                        const isRetard = currentWeek > lastWeekOfMois;
+                        
+                        if (isRetard) {
+                            // Site en retard (semaine courante > dernière semaine du mois prévu)
                             dataBySection[row.sector][sttKey].visitesEnRetard += row.restantes;
                             window.DSF_STT_DATA[row.sector][sttKey].sitesEnRetard.push({
                                 numClient: row.numClient || '',
                                 nomSite: row.nomSite || '',
                                 ville: row.ville || '',
-                                moisSTT: MOIS_NOMS[moisNum - 1]
+                                moisSTT: MOIS_NOMS[moisNum - 1],
+                                contact: row.contact || '',
+                                heureDSF: row.heureDSF || ''
                             });
                         } else {
                             // Site à planifier (mois courant ou futur)
@@ -8743,7 +8936,9 @@
                                 numClient: row.numClient || '',
                                 nomSite: row.nomSite || '',
                                 ville: row.ville || '',
-                                moisSTT: MOIS_NOMS[moisNum - 1]
+                                moisSTT: MOIS_NOMS[moisNum - 1],
+                                contact: row.contact || '',
+                                heureDSF: row.heureDSF || ''
                             });
                         }
                     }
@@ -8799,17 +8994,19 @@
                     
                     totalRestant += d.visitesRestantes;
                     
-                    // STT cliquable si en retard - ouvre la modal
-                    const sttDisplay = hasRetard 
-                        ? `<span class="stt-clickable has-retard" onclick="openDSFRelanceModal('${stt.replace(/'/g, "\\'")}', '${sector}')" title="Cliquez pour relancer">${stt}</span>`
-                        : stt;
+                    // TOUS les STT sont cliquables - ouvre la modal
+                    const sttClass = hasRetard ? 'stt-clickable has-retard' : 'stt-clickable';
+                    const sttTitle = hasRetard ? 'Cliquez pour relancer (sites en retard)' : 'Cliquez pour voir les sites';
+                    const sttDisplay = `<span class="${sttClass}" onclick="openDSFRelanceModal('${stt.replace(/'/g, "\\'")}', '${sector}')" title="${sttTitle}">${stt}</span>`;
                     
                     html += `
                         <tr${hasRetard ? ' style="background: rgba(239, 68, 68, 0.05);"' : ''}>
                             <td class="stt-name">${sttDisplay}</td>
                             <td>${d.nbVisitesTotales}</td>
                             ${d.mois.map((v, i) => {
-                                const isOverdue = v > 0 && i + 1 < currentMonth;
+                                // Retard basé sur la semaine
+                                const lastWeekOfMois = getLastWeekOfMonth(i + 1);
+                                const isOverdue = v > 0 && currentWeek > lastWeekOfMois;
                                 const isCurrent = i + 1 === currentMonth;
                                 return `<td class="month-cell${isCurrent ? ' current' : ''}${isOverdue ? ' overdue' : ''}">${v || '-'}</td>`;
                             }).join('')}
@@ -9251,9 +9448,11 @@
                                     <th>N° Travaux</th>
                                     <th>Nom Site</th>
                                     <th>Ville</th>
+                                    <th>Dept</th>
                                     <th>STT</th>
                                     <th>PL STT</th>
                                     <th>Budget</th>
+                                    <th>Technicien</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -9264,6 +9463,8 @@
                     const historyStr = history.slice(-2).map(d => new Date(d).toLocaleDateString('fr-FR')).join('<br>') || '-';
                     const numTravaux = `${row[0] || ''}TX${row[2] || ''}`;
                     const plStt = row.pl_stt || '-';
+                    // Département = col 36 (index 35) ou extraire des 2 premiers chiffres du CP
+                    const dept = String(row[35] || '').trim().substring(0, 2);
                     
                     html += `
                         <tr>
@@ -9272,9 +9473,11 @@
                             <td><strong>${numTravaux}</strong></td>
                             <td>${row[9] || ''}</td>
                             <td>${row[34] || ''}</td>
+                            <td>${dept}</td>
                             <td>${row.stt_converted}</td>
                             <td>${plStt}</td>
                             <td>${formatCurrency(row.budget_stt)}</td>
+                            <td>${row.tech_converted || ''}</td>
                         </tr>
                     `;
                 });
@@ -9312,46 +9515,115 @@
             sendSttEmail(rows) {
                 if (rows.length === 0) return;
                 
-                const first = rows[0];
-                const email = first.stt_email || '';
-                const nomStt = first.stt_converted || 'Sous-traitant';
+                const firstRow = rows[0];
+                const email = firstRow.stt_email || '';
+                const nomSTT = firstRow.stt_converted || 'Sous-traitant';
+                const type = this.currentSttTab;
                 
-                let body = `Bonjour ${nomStt},\n\n`;
-                body += this.currentSttTab === 'aPlanifier'
-                    ? 'Merci de nous communiquer vos dates de disponibilité pour les travaux suivants :\n\n'
-                    : 'Rappel concernant les travaux planifiés suivants :\n\n';
+                let body = `Bonjour ${nomSTT},\n\n`;
                 
-                rows.forEach(r => {
-                    body += `- ${r[0] || ''} TX ${r[2] || ''} | ${r[9] || ''} | ${r[34] || ''}\n`;
-                    body += `  Budget: ${formatCurrency(r.budget_stt)}\n\n`;
+                if (type === 'aPlanifier') {
+                    body += `Merci de nous communiquer vos dates de disponibilité pour les travaux suivants :\n\n`;
+                } else {
+                    body += `Rappel concernant les travaux planifiés suivants :\n\n`;
+                }
+
+                rows.forEach((row, idx) => {
+                    const numClient = String(row[0] || '').trim();
+                    const numDevis = String(row[2] || '').trim();
+                    const numTravaux = numClient + 'TX' + numDevis;
                     
-                    // Sauvegarder historique
-                    if (!this.emailHistory[r.uniqueKey]) this.emailHistory[r.uniqueKey] = [];
-                    this.emailHistory[r.uniqueKey].unshift(new Date().toISOString());
-                    if (this.emailHistory[r.uniqueKey].length > 2) this.emailHistory[r.uniqueKey].pop();
+                    body += `════════════════════════════════════════\n`;
+                    body += `       N° TRAVAUX : ${numTravaux}\n`;
+                    body += `════════════════════════════════════════\n\n`;
+                    
+                    body += `${this.allHeaders[58] || 'Commande'} : ${String(row[58] || '').trim()}\n`;
+                    body += `Rédacteur Devis : ${row.redacteur_converted || ''}\n`;
+                    // Technicien : Trigramme + Nom complet + Téléphone
+                    let techInfo = row.tech_converted || '';
+                    if (row.technicien_nom) techInfo += ' ' + row.technicien_nom;
+                    if (row.technicien_telephone) techInfo += ' - Tél: ' + row.technicien_telephone;
+                    body += `Technicien du site : ${techInfo}\n\n`;
+                    
+                    body += `--- INFORMATIONS CLIENT ---\n`;
+                    body += `${this.allHeaders[9] || 'Nom Client'} : ${String(row[9] || '').trim()}\n`;
+                    body += `${this.allHeaders[7] || 'Adresse'} : ${String(row[7] || '').trim()}\n`;
+                    body += `${this.allHeaders[33] || 'Adresse 2'} : ${String(row[33] || '').trim()}\n`;
+                    body += `${this.allHeaders[34] || 'Ville'} : ${String(row[34] || '').trim()}\n`;
+                    body += `${this.allHeaders[36] || 'Contact'} : ${String(row[36] || '').trim()}\n`;
+                    body += `${this.allHeaders[39] || 'Email'} : ${String(row[39] || '').trim()}\n`;
+                    body += `${this.allHeaders[42] || 'Tél'} : ${String(row[42] || '').trim()}\n\n`;
+                    
+                    body += `--- DÉTAIL DES TRAVAUX ---\n`;
+                    body += `${this.allHeaders[12] || 'Pièce 1'} : ${String(row[12] || '').trim()}\n`;
+                    body += `${this.allHeaders[14] || 'Pièce 2'} : ${String(row[14] || '').trim()}\n`;
+                    body += `${this.allHeaders[16] || 'Pièce 3'} : ${String(row[16] || '').trim()}\n`;
+                    body += `${this.allHeaders[18] || 'Pièce 4'} : ${String(row[18] || '').trim()}\n`;
+                    body += `${this.allHeaders[20] || 'Pièce 5'} : ${String(row[20] || '').trim()}\n\n`;
+                    
+                    if (type === 'planifies' && row.pl_stt) {
+                        body += `📅 Date prévue : ${row.pl_stt}\n\n`;
+                    }
+
+                    // Enregistrer l'historique
+                    if (!this.emailHistory[row.uniqueKey]) this.emailHistory[row.uniqueKey] = [];
+                    this.emailHistory[row.uniqueKey].unshift(new Date().toISOString());
+                    if (this.emailHistory[row.uniqueKey].length > 2) this.emailHistory[row.uniqueKey].pop();
                 });
-                
+
+                // Sauvegarder l'historique
                 localStorage.setItem('travaux_email_history', JSON.stringify(this.emailHistory));
+
+                body += `════════════════════════════════════════\n\n`;
                 
-                body += '\nCordialement';
+                if (type === 'aPlanifier') {
+                    body += `Merci de nous confirmer vos disponibilités.\n\nCordialement`;
+                } else {
+                    body += `Merci de nous confirmer la bonne réalisation des travaux.\n\nCordialement`;
+                }
                 
-                window.location.href = `mailto:${email}?subject=Travaux à planifier - ${nomStt}&body=${encodeURIComponent(body)}`;
+                const subject = type === 'aPlanifier' 
+                    ? `Demande de disponibilité - ${rows.length} travaux - ${nomSTT}`
+                    : `Rappel travaux planifiés - ${rows.length} travaux - ${nomSTT}`;
+                
+                window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
             },
 
             sendEmailRedacteur() {
-                const redacteur = document.getElementById('travauxRedacteurFilter').value;
-                if (redacteur === 'TOUS' || this.filtered.length === 0) return;
+                const redacteurName = document.getElementById('travauxRedacteurFilter').value;
+                if (redacteurName === 'TOUS' || this.filtered.length === 0) return;
                 
                 const email = this.filtered[0].redacteur_email || '';
                 if (!email) { alert('Email non trouvé.'); return; }
                 
-                let body = `Salut ${redacteur},\n\nDevis et travaux maintenance à planifier :\n\n`;
+                let body = `Salut ${redacteurName},\n\nDevis et travaux maintenance à te planifier\n\n`;
+                body += 'Nom du client/ N° devis /Nom du client/ Détail site/ Adresse/ Ville/ Contact site/ email contact/ Pieces 1/ Pieces 2/ Pieces 3/ Pieces 4/ Pieces 5\n\n';
                 
-                this.filtered.forEach(r => {
-                    body += `- ${r[0] || ''} TX ${r[2] || ''} | ${r[9] || ''} | ${r[34] || ''}\n`;
+                this.filtered.forEach((row, i) => {
+                    let nomClient = String(row[0] || '').trim();
+                    let devis = String(row[2] || '').replace(/[\r\n]+/g, " ").trim();
+                    body += nomClient + ' TX ' + devis;
+                    body += ' ---- ---- ---- ';
+                    let detailSite = String(row[9] || '').replace(/[\r\n]+/g, " ").trim();
+                    body += nomClient + ' ---- ';
+                    let adresse = String(row[7] || '').replace(/[\r\n]+/g, " ").trim();
+                    body += detailSite + ' ---- ';
+                    body += adresse + ' ---- ';
+                    let ville = String(row[34] || '').replace(/[\r\n]+/g, " ").trim();
+                    body += ville + ' ---- ';
+                    let contact = String(row[36] || '').replace(/[\r\n]+/g, " ").trim();
+                    body += contact + ' ---- ';
+                    let emailContact = String(row[39] || '').replace(/[\r\n]+/g, " ").trim();
+                    body += emailContact + ' ---- ';
+                    [12, 14, 16, 18, 20].forEach((colIdx, idx) => {
+                        let piece = String(row[colIdx] || '').replace(/[\r\n]+/g, " ").trim();
+                        body += piece;
+                        if (idx < 4) body += ' ---- ';
+                    });
+                    body += '\n\n';
                 });
                 
-                window.location.href = `mailto:${email}?subject=Suivi Travaux ${redacteur}&body=${encodeURIComponent(body)}`;
+                window.location.href = `mailto:${email}?subject=Suivi Travaux ${redacteurName}&body=${encodeURIComponent(body)}`;
             },
 
             // Modals Stats
@@ -10159,6 +10431,113 @@
 
 
         // ============================================
+        // MODAL DSF CLOTURE/PLANIF/RESP + RELANCE MAIL
+        // ============================================
+        const DSFMODAL = { type:'cloture', sector:'S1', stt:'ALL', mois:'ALL', data:[], filtered:[], history:JSON.parse(localStorage.getItem('dsf_mail_history')||'{}') };
+
+        function openDSFModal(type, sector) {
+            DSFMODAL.type = type; DSFMODAL.sector = sector; DSFMODAL.stt = 'ALL'; DSFMODAL.mois = 'ALL';
+            let src = type==='cloture' ? DSF.cloture : type==='planif' ? DSF.planif : DSF.resp;
+            DSFMODAL.data = src.filter(r => r.secteur === sector);
+            DSFMODAL.filtered = [...DSFMODAL.data];
+            const labels = { cloture:'📋 DSF Non Clôturés', planif:'📅 DSF Non Planifiés', resp:'⚠️ DSF Sans Responsable' };
+            document.getElementById('dsfModalTitle').textContent = `${labels[type]} - ${sector}`;
+            document.getElementById('dsfMailStatus').textContent = '';
+            renderDSFMoisFilters(); renderDSFSttFilters(); renderDSFTable();
+            document.getElementById('dsfModal').style.display = 'flex';
+        }
+
+        function closeDSFModal() { document.getElementById('dsfModal').style.display = 'none'; }
+
+        function renderDSFMoisFilters() {
+            const counts = {}; DSFMODAL.data.forEach(r => { const m = r.moisSTT || 'Sans mois'; counts[m] = (counts[m]||0)+1; });
+            document.getElementById('dsfMoisAll').textContent = DSFMODAL.data.length;
+            let html = '';
+            Object.entries(counts).sort((a,b) => (parseInt(a[0])||99)-(parseInt(b[0])||99)).forEach(([m,c]) => {
+                const active = DSFMODAL.mois===m ? 'active' : '';
+                const label = m==='Sans mois' ? m : `M${m}`;
+                html += `<button class="dsf-flt-btn ${active}" data-mois="${m}" onclick="filterDSFMois('${m}')">${label} <span class="dsf-flt-cnt">${c}</span></button>`;
+            });
+            document.getElementById('dsfMoisContainer').innerHTML = html;
+            document.querySelector('.dsf-flt-btn[data-mois="ALL"]')?.classList.toggle('active', DSFMODAL.mois==='ALL');
+        }
+
+        function renderDSFSttFilters() {
+            const base = DSFMODAL.mois==='ALL' ? DSFMODAL.data : DSFMODAL.data.filter(r => (r.moisSTT||'Sans mois')===DSFMODAL.mois);
+            const counts = {}; base.forEach(r => { const s = r.stt || 'Sans STT'; counts[s] = (counts[s]||0)+1; });
+            document.getElementById('dsfSttAll').textContent = base.length;
+            let html = '';
+            Object.entries(counts).sort((a,b) => b[1]-a[1]).forEach(([s,c]) => {
+                const active = DSFMODAL.stt===s ? 'active' : '';
+                html += `<button class="dsf-flt-btn ${active}" data-stt="${s}" onclick="filterDSFStt('${s.replace(/'/g,"\\'")}')">${s} <span class="dsf-flt-cnt">${c}</span></button>`;
+            });
+            document.getElementById('dsfSttContainer').innerHTML = html;
+            document.querySelector('.dsf-flt-btn[data-stt="ALL"]')?.classList.toggle('active', DSFMODAL.stt==='ALL');
+        }
+
+        function filterDSFMois(m) {
+            DSFMODAL.mois = m; DSFMODAL.stt = 'ALL'; applyDSFFilters();
+            document.querySelectorAll('.dsf-flt-btn[data-mois]').forEach(b => b.classList.toggle('active', b.dataset.mois===m));
+            renderDSFSttFilters(); renderDSFTable();
+        }
+
+        function filterDSFStt(s) {
+            DSFMODAL.stt = s; applyDSFFilters();
+            document.querySelectorAll('.dsf-flt-btn[data-stt]').forEach(b => b.classList.toggle('active', b.dataset.stt===s));
+            renderDSFTable();
+        }
+
+        function applyDSFFilters() {
+            let f = [...DSFMODAL.data];
+            if (DSFMODAL.mois!=='ALL') f = f.filter(r => (r.moisSTT||'Sans mois')===DSFMODAL.mois);
+            if (DSFMODAL.stt!=='ALL') f = f.filter(r => (r.stt||'Sans STT')===DSFMODAL.stt);
+            DSFMODAL.filtered = f;
+        }
+
+        function renderDSFTable() {
+            const tbody = document.getElementById('dsfTableBody');
+            if (DSFMODAL.filtered.length===0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted);">Aucun site</td></tr>'; return; }
+            let html = '';
+            DSFMODAL.filtered.forEach(r => {
+                const mois = r.moisSTT ? `M${r.moisSTT}` : '-';
+                html += `<tr><td><strong>${r.numClient||'-'}</strong></td><td>${r.nomSite||'-'}</td><td>${r.ville||'-'}</td>
+                    <td style="text-align:center;"><span style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:3px 10px;border-radius:12px;font-weight:600;font-size:0.85em;">${mois}</span></td>
+                    <td>${r.stt||'-'}</td><td><span class="sector-badge ${(r.secteur||'autres').toLowerCase()}">${r.secteur}</span></td></tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function sendDSFRelance() {
+            const data = DSFMODAL.filtered;
+            const statusEl = document.getElementById('dsfMailStatus');
+            if (data.length===0) { statusEl.textContent = '❌ Aucun site à relancer'; return; }
+            if (DSFMODAL.stt==='ALL') { statusEl.textContent = '⚠️ Sélectionnez un STT'; return; }
+            
+            const sttCode = data[0]?.sttCode || '';
+            const sttInfo = APP.tables.stt.get(sttCode);
+            const sttEmail = sttInfo?.email || '';
+            const sttName = DSFMODAL.stt;
+            const typeLabels = { cloture:'CLÔTURE', planif:'PLANIFICATION', resp:'RESPONSABLE' };
+            const typeLabel = typeLabels[DSFMODAL.type];
+            
+            const subject = `⚠️ RAPPEL ${typeLabel} DSF : ${data.length} site(s) en attente pour ${sttName} (${DSFMODAL.sector})`;
+            let body = `Bonjour ${sttName},\n\nVous avez des visites DSF en attente de ${typeLabel.toLowerCase()}.\n\n`;
+            data.forEach(r => {
+                body += `════════════════════════════════════════\n       SITE N° : ${r.numClient||'-'}\n════════════════════════════════════════\n\nNom du Site : ${r.nomSite||'-'}\nVille : ${r.ville||'-'}\nMois STT : ${r.moisSTT||'-'}\n\n`;
+            });
+            body += `════════════════════════════════════════\n\nMerci de nous renvoyer le rapport ou de nous indiquer la date de replanification.\n\nCordialement,\nVotre Tableau de Bord de Suivi`;
+            
+            const histKey = `${DSFMODAL.type}_${DSFMODAL.sector}_${sttCode}`;
+            if (!DSFMODAL.history[histKey]) DSFMODAL.history[histKey] = [];
+            DSFMODAL.history[histKey].unshift(new Date().toISOString());
+            if (DSFMODAL.history[histKey].length > 2) DSFMODAL.history[histKey].pop();
+            localStorage.setItem('dsf_mail_history', JSON.stringify(DSFMODAL.history));
+            
+            window.location.href = `mailto:${sttEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            statusEl.textContent = '✅ Client mail ouvert';
+        }
+
+        // ============================================
         // MODULE DSF TRACKER - LOGIQUE
         // ============================================
         const DSF = {
@@ -10190,23 +10569,26 @@
             },
 
             processData() {
-                // DSF CLOTURE
-                this.cloture = APP.data.dsfCloture.map((row, idx) => {
-                    const values = Object.values(row);
-                    return this.processRow(values, idx, 'cloture');
-                });
+                // DSF CLOTURE - données déjà converties lors du chargement
+                this.cloture = APP.data.dsfCloture.map((row, idx) => ({
+                    _raw: row._raw, _index: idx, _type: 'cloture',
+                    secteur: row.secteur || 'AUTRES', stt: row.stt || '', sttCode: row.sttCode || '',
+                    moisSTT: row.moisSTT || '', numClient: row.numClient || '', nomSite: row.nomSite || '', ville: row.ville || ''
+                }));
                 
                 // DSF PLANIF
-                this.planif = APP.data.dsfPlanif.map((row, idx) => {
-                    const values = Object.values(row);
-                    return this.processRow(values, idx, 'planif');
-                });
+                this.planif = APP.data.dsfPlanif.map((row, idx) => ({
+                    _raw: row._raw, _index: idx, _type: 'planif',
+                    secteur: row.secteur || 'AUTRES', stt: row.stt || '', sttCode: row.sttCode || '',
+                    moisSTT: row.moisSTT || '', numClient: row.numClient || '', nomSite: row.nomSite || '', ville: row.ville || ''
+                }));
                 
                 // DSF RESP
-                this.resp = APP.data.dsfResp.map((row, idx) => {
-                    const values = Object.values(row);
-                    return this.processRow(values, idx, 'resp');
-                });
+                this.resp = APP.data.dsfResp.map((row, idx) => ({
+                    _raw: row._raw, _index: idx, _type: 'resp',
+                    secteur: row.secteur || 'AUTRES', stt: row.stt || '', sttCode: row.sttCode || '',
+                    moisSTT: row.moisSTT || '', numClient: row.numClient || '', nomSite: row.nomSite || '', ville: row.ville || ''
+                }));
             },
 
             processRow(values, idx, type) {
@@ -10876,15 +11258,15 @@
 <div style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:4px 8px;border-radius:4px;margin-bottom:4px;font-size:0.85em;font-weight:600;">📅 PLANNING SSI</div>
 <table style="width:100%;border-collapse:collapse;background:white;border-radius:4px;overflow:hidden;font-size:0.9em;">
 <tr style="border-bottom:1px solid #e9ecef;"><td style="padding:3px 6px;font-weight:600;color:#555;background:#f8f9fa;width:60%;">V0 date max (BK)</td><td style="padding:3px 6px;">${fmtDate(62)}</td></tr>
-<tr style="border-bottom:1px solid #e9ecef;"><td style="padding:3px 6px;font-weight:600;color:#555;background:#f8f9fa;">V1-23 (BP)</td><td style="padding:3px 6px;">${fmtDate(67)}</td></tr>
-<tr style="border-bottom:1px solid #e9ecef;"><td style="padding:3px 6px;font-weight:600;color:#555;background:#f8f9fa;">V2-23 (BQ)</td><td style="padding:3px 6px;">${fmtDate(68)}</td></tr>
+<tr style="border-bottom:1px solid #e9ecef;"><td style="padding:3px 6px;font-weight:600;color:#555;background:#f8f9fa;">${YEAR_COLS.V1} (BP)</td><td style="padding:3px 6px;">${fmtDate(67)}</td></tr>
+<tr style="border-bottom:1px solid #e9ecef;"><td style="padding:3px 6px;font-weight:600;color:#555;background:#f8f9fa;">${YEAR_COLS.V2} (BQ)</td><td style="padding:3px 6px;">${fmtDate(68)}</td></tr>
 <tr style="border-bottom:1px solid #e9ecef;"><td style="padding:3px 6px;font-weight:600;color:#555;background:#f8f9fa;">PL 1er sem (BT)</td><td style="padding:3px 6px;">${fmtDate(71)}</td></tr>
 <tr style="border-bottom:1px solid #e9ecef;"><td style="padding:3px 6px;font-weight:600;color:#555;background:#f8f9fa;">PL 2eme sem (BV)</td><td style="padding:3px 6px;">${fmtDate(73)}</td></tr>
 </table>
 <div style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:4px 8px;border-radius:4px;margin:6px 0 4px;font-size:0.85em;font-weight:600;">🔄 RECO</div>
 <table style="width:100%;border-collapse:collapse;background:white;border-radius:4px;overflow:hidden;font-size:0.9em;">
 <tr style="border-bottom:1px solid #e9ecef;"><td style="padding:3px 6px;font-weight:600;color:#555;background:#f8f9fa;width:60%;">Prépayé</td><td style="padding:3px 6px;">${chk(22)}</td></tr>
-<tr style="border-bottom:1px solid #e9ecef;"><td style="padding:3px 6px;font-weight:600;color:#555;background:#f8f9fa;">Recond 2023</td><td style="padding:3px 6px;">${val(89)}</td></tr>
+<tr style="border-bottom:1px solid #e9ecef;"><td style="padding:3px 6px;font-weight:600;color:#555;background:#f8f9fa;">Recond ${YEAR_COLS.annee}</td><td style="padding:3px 6px;">${val(89)}</td></tr>
 <tr style="border-bottom:1px solid #e9ecef;"><td style="padding:3px 6px;font-weight:600;color:#555;background:#f8f9fa;">Recond</td><td style="padding:3px 6px;">${val(21)}</td></tr>
 <tr style="border-bottom:1px solid #e9ecef;"><td style="padding:3px 6px;font-weight:600;color:#555;background:#f8f9fa;">PL recond</td><td style="padding:3px 6px;">${fmtDate(91)}</td></tr>
 <tr style="border-bottom:1px solid #e9ecef;"><td style="padding:3px 6px;font-weight:600;color:#555;background:#f8f9fa;">Recond expe</td><td style="padding:3px 6px;">${fmtDate(101)}</td></tr>
@@ -11362,91 +11744,6 @@
         function formatProduitPrice(price) {
             if (!price || price === 0) return '0.00';
             return parseFloat(price).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
-
-        // ============================================
-        // FIREBASE AUTHENTICATION (CONFIG INTÉGRÉE)
-        // ============================================
-        (function initFirebaseAuth() {
-            // Configuration Firebase intégrée
-            const firebaseConfig = {
-                apiKey: "AIzaSyC-zpGDbnkqkWkjCdxsOjFg8Q5n5KCBgX0",
-                authDomain: "dashboard-a012f.firebaseapp.com",
-                projectId: "dashboard-a012f",
-                storageBucket: "dashboard-a012f.firebasestorage.app",
-                messagingSenderId: "429058528722",
-                appId: "1:429058528722:web:4bb4d3e086ba2fcdbc184b"
-            };
-            
-            try {
-                if (!firebase.apps.length) {
-                    firebase.initializeApp(firebaseConfig);
-                }
-                
-                // Check auth state
-                firebase.auth().onAuthStateChanged(async function(user) {
-                    const loadingEl = document.getElementById('auth-loading');
-                    const userInfoEl = document.getElementById('userInfo');
-                    const logoutBtnEl = document.getElementById('logoutBtn');
-                    const userEmailEl = document.getElementById('userEmail');
-                    
-                    if (user) {
-                        // Vérifier le status dans Firestore
-                        const db = firebase.firestore();
-                        const userDoc = await db.collection('users').doc(user.email).get();
-                        
-                        if (!userDoc.exists || userDoc.data().status !== 'approved') {
-                            // Non validé, déconnecter et rediriger
-                            console.log('❌ User not approved');
-                            await firebase.auth().signOut();
-                            window.location.href = 'index.html';
-                            return;
-                        }
-                        
-                        // User is signed in and approved
-                        console.log('✅ User authenticated:', user.email);
-                        
-                        // Show UI elements
-                        if (userInfoEl) {
-                            userInfoEl.style.display = 'flex';
-                        }
-                        if (logoutBtnEl) {
-                            logoutBtnEl.style.display = 'flex';
-                        }
-                        if (userEmailEl) {
-                            userEmailEl.textContent = user.email;
-                        }
-                        
-                        // Hide loading
-                        setTimeout(() => {
-                            if (loadingEl) {
-                                loadingEl.classList.add('hidden');
-                            }
-                        }, 500);
-                        
-                    } else {
-                        // User is signed out, redirect to login
-                        console.log('❌ User not authenticated');
-                        window.location.href = 'index.html';
-                    }
-                });
-                
-            } catch (error) {
-                console.error('Firebase init error:', error);
-                window.location.href = 'index.html';
-            }
-        })();
-        
-        // Logout function
-        function handleLogout() {
-            if (confirm('Voulez-vous vraiment vous déconnecter ?')) {
-                firebase.auth().signOut().then(() => {
-                    window.location.href = 'index.html';
-                }).catch((error) => {
-                    console.error('Logout error:', error);
-                    alert('Erreur lors de la déconnexion');
-                });
-            }
         }
 
     </script>
