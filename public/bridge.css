@@ -1,0 +1,54 @@
+/* ============================================
+   BRIDGE STATUS CSS
+   ============================================ */
+
+.bridge-status-container {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 10px;
+    margin-right: 16px;
+}
+
+.bridge-status {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.bridge-status.connected {
+    background: #10b981;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+}
+
+.bridge-status.disconnected {
+    background: #ef4444;
+}
+
+.bridge-status.loading {
+    background: #f59e0b;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    50% { opacity: 0.5; }
+}
+
+.bridge-status-text {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+.bridge-status-container.connected .bridge-status-text {
+    color: #10b981;
+}
+
+/* Last sync time */
+.bridge-last-sync {
+    font-size: 11px;
+    color: #64748b;
+    margin-left: 8px;
+}
