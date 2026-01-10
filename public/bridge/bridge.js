@@ -79,8 +79,8 @@ const BRIDGE = {
         const startTime = Date.now();
         
         try {
-            // Charger toutes les données en parallèle
-            const [ssi, dsf, dsfCloture, dsfPlanif, dsfResp, devis, travaux, reco, tech, stt] = await Promise.all([
+            // Charger toutes les données en parallèle (+ SAV + CONTRATS + CONTACTS)
+            const [ssi, dsf, dsfCloture, dsfPlanif, dsfResp, devis, travaux, reco, tech, stt, sav, contrats, contacts] = await Promise.all([
                 this.fetchData('/api/ssi'),
                 this.fetchData('/api/dsf'),
                 this.fetchData('/api/dsf/cloture'),
@@ -90,7 +90,10 @@ const BRIDGE = {
                 this.fetchData('/api/travaux'),
                 this.fetchData('/api/reco'),
                 this.fetchData('/api/tech'),
-                this.fetchData('/api/stt')
+                this.fetchData('/api/stt'),
+                this.fetchData('/api/sav'),
+                this.fetchData('/api/contrats'),
+                this.fetchData('/api/contacts')
             ]);
             
             console.log('📊 Données reçues:', {
@@ -103,8 +106,20 @@ const BRIDGE = {
                 travaux: travaux?.count || 0,
                 reco: reco?.count || 0,
                 tech: tech?.count || 0,
-                stt: stt?.count || 0
+                stt: stt?.count || 0,
+                sav: sav?.count || 0,
+                contrats: contrats?.count || 0,
+                contacts: contacts?.status === 'ok' ? 'OK' : 'FAIL'
             });
+            
+            // Charger les contacts dans APP.contacts
+            if (contacts && contacts.status === 'ok') {
+                APP.contacts = {
+                    techniciens: contacts.techniciens || {},
+                    sousTraitants: contacts.sousTraitants || {}
+                };
+                console.log('👷 Contacts chargés via Bridge - Tech:', Object.keys(APP.contacts.techniciens).length, '| STT:', Object.keys(APP.contacts.sousTraitants).length);
+            }
             
             // Convertir en format tableau [headers, ...rows]
             const sheetData = {
@@ -117,13 +132,18 @@ const BRIDGE = {
                 'DSF RESP': this.toSheetArray(dsfResp),
                 'TRAVAUX': this.toSheetArray(travaux),
                 'DEVIS': this.toSheetArray(devis),
-                'RECO': this.toSheetArray(reco)
+                'RECO': this.toSheetArray(reco),
+                // Nouvelles feuilles SAV
+                'Inter techniques 2009': this.toSheetArray(sav),
+                'Liste des contrats en cours': this.toSheetArray(contrats)
             };
             
             // Debug: afficher les headers
             console.log('📋 Headers SSI:', sheetData['SSI'][0]?.slice(0, 10));
             console.log('📋 Headers TRAVAUX:', sheetData['TRAVAUX'][0]?.slice(0, 10));
             console.log('📋 Headers TECH:', sheetData['TECH'][0]);
+            console.log('📋 Headers SAV:', sheetData['Inter techniques 2009'][0]?.slice(0, 10));
+            console.log('📋 Headers CONTRATS:', sheetData['Liste des contrats en cours'][0]?.slice(0, 10));
             
             // Créer un faux workbook
             const fakeWorkbook = {

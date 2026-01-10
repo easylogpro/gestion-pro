@@ -18,7 +18,13 @@ CORS(app)
 # ============================================================
 DATABASE_PATH = r"C:\Users\Administrateur\Desktop\CONTRAT 2022.accdb"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-CONTACTS_PATH = os.path.join(SCRIPT_DIR, "contacts.json")
+
+# Plusieurs chemins possibles pour contacts.json
+CONTACTS_PATHS = [
+    os.path.normpath(os.path.join(SCRIPT_DIR, "..", "data", "contacts.json")),
+    os.path.normpath(os.path.join(SCRIPT_DIR, "contacts.json")),
+    os.path.normpath(os.path.join(SCRIPT_DIR, "..", "contacts.json")),
+]
 
 # MAPPING : Feuille Excel → Requête Access
 SOURCES = {
@@ -31,7 +37,10 @@ SOURCES = {
     'TRAVAUX': 'Liste travaux en cours',
     'RECO': 'Reconditionnement 2008',
     'TECH': 'Technicien',
-    'STT': 'Sous traitants'
+    'STT': 'Sous traitants',
+    # SAV - Interventions techniques
+    'SAV': 'Inter techniques 2009',
+    'CONTRATS': 'Liste des contrats en cours'
 }
 
 # Cache
@@ -98,18 +107,44 @@ def load_contacts():
     if CACHE['contacts'] is not None:
         return CACHE['contacts']
     
+    # Chercher dans plusieurs chemins
+    contacts_path = None
+    for path in CONTACTS_PATHS:
+        print(f"🔍 Recherche: {path} -> {os.path.exists(path)}")
+        if os.path.exists(path):
+            contacts_path = path
+            break
+    
+    if not contacts_path:
+        print(f"⚠️ contacts.json non trouvé dans aucun chemin")
+        CACHE['contacts'] = {"techniciens": {}, "sousTraitants": {}}
+        return CACHE['contacts']
+    
     try:
-        if os.path.exists(CONTACTS_PATH):
-            with open(CONTACTS_PATH, 'r', encoding='utf-8') as f:
-                CACHE['contacts'] = json.load(f)
-                print(f"✅ Contacts chargés: {len(CACHE['contacts'].get('techniciens', {}))} tech, {len(CACHE['contacts'].get('soustraitants', {}))} stt")
-                return CACHE['contacts']
-        
-        print(f"⚠️ Fichier contacts.json non trouvé")
-        return {"techniciens": {}, "soustraitants": {}}
+        with open(contacts_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            
+            # Normaliser les clés (sous_traitants ou sousTraitants -> sousTraitants)
+            tech = data.get('techniciens', {})
+            stt = data.get('sous_traitants', data.get('sousTraitants', {}))
+            
+            # Corriger les emails mal formatés (virgules -> points)
+            for contact in stt.values():
+                if contact.get('mail'):
+                    contact['mail'] = contact['mail'].replace(',', '.')
+            
+            CACHE['contacts'] = {
+                'techniciens': tech,
+                'sousTraitants': stt
+            }
+            
+            print(f"✅ Contacts chargés depuis {contacts_path}: {len(tech)} tech, {len(stt)} stt")
+            return CACHE['contacts']
+            
     except Exception as e:
         print(f"❌ Erreur contacts: {e}")
-        return {"techniciens": {}, "soustraitants": {}}
+        CACHE['contacts'] = {"techniciens": {}, "sousTraitants": {}}
+        return CACHE['contacts']
 
 # ============================================================
 # ENDPOINTS API
@@ -133,6 +168,9 @@ def home():
         <li><a href="/api/reco">/api/reco</a></li>
         <li><a href="/api/tech">/api/tech</a></li>
         <li><a href="/api/stt">/api/stt</a></li>
+        <li><a href="/api/sav">/api/sav</a></li>
+        <li><a href="/api/contrats">/api/contrats</a></li>
+        <li><a href="/api/contacts">/api/contacts</a> ⭐ EMAILS STT + TEL TECH</li>
     </ul>
     '''
 
@@ -227,7 +265,7 @@ def api_stt():
     """
     result = get_data_as_array('STT')
     contacts = load_contacts()
-    stt_contacts = contacts.get('soustraitants', {})
+    stt_contacts = contacts.get('sousTraitants', {})
     
     # Headers attendus par parseWorkbook
     headers = ['N°', 'sous traitant', 'mail', 'Colonne1']
@@ -250,6 +288,47 @@ def api_stt():
     
     return jsonify({"status": "ok", "count": len(rows), "headers": headers, "rows": rows})
 
+@app.route('/api/sav')
+def api_sav():
+    """
+    SAV - Inter techniques 2009
+    Interventions en cours (non terminées, non annulées)
+    """
+    result = get_data_as_array('SAV')
+    return jsonify({
+        "status": "ok", 
+        "count": len(result["rows"]), 
+        "headers": result["headers"], 
+        "rows": result["rows"]
+    })
+
+@app.route('/api/contrats')
+def api_contrats():
+    """
+    CONTRATS - Liste des contrats en cours
+    Pour jointure avec SAV (numéro client)
+    """
+    result = get_data_as_array('CONTRATS')
+    return jsonify({
+        "status": "ok", 
+        "count": len(result["rows"]), 
+        "headers": result["headers"], 
+        "rows": result["rows"]
+    })
+
+@app.route('/api/contacts')
+def api_contacts():
+    """
+    CONTACTS - Retourne le fichier contacts.json complet
+    Pour l'app web (emails STT, téléphones tech)
+    """
+    contacts = load_contacts()
+    return jsonify({
+        "status": "ok",
+        "techniciens": contacts.get('techniciens', {}),
+        "sousTraitants": contacts.get('sousTraitants', {})
+    })
+
 # ============================================================
 # LANCEMENT
 # ============================================================
@@ -258,7 +337,10 @@ if __name__ == '__main__':
     print("🌉 BRIDGE ACCESS - Format TABLEAU")
     print("=" * 60)
     print(f"📁 Base: {DATABASE_PATH}")
-    print(f"📁 Contacts: {CONTACTS_PATH}")
+    print(f"📁 Script dir: {SCRIPT_DIR}")
+    print(f"📁 Chemins contacts possibles:")
+    for p in CONTACTS_PATHS:
+        print(f"   - {p}")
     
     try:
         conn = get_connection()
